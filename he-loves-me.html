@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>He Loves Me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blush-1: #fff6f3;
+    --blush-2: #ffe4ec;
+    --blush-3: #ffd0dd;
+    --petal-light: #ffc9d6;
+    --petal-mid: #ff9fb8;
+    --petal-deep: #f2718f;
+    --center-1: #ffd98a;
+    --center-2: #f2a541;
+    --stem: #7fa26b;
+    --stem-dark: #5f8351;
+    --ink: #6b3547;
+    --rose: #c9184a;
+    --gold: #d99b3f;
+    --card-bg: rgba(255, 250, 248, 0.88);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100svh;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, var(--blush-2), transparent 60%),
+      linear-gradient(160deg, var(--blush-1) 0%, var(--blush-2) 55%, var(--blush-3) 100%);
+    font-family: 'Quicksand', sans-serif;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 560px;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px 40px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .eyebrow-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.15rem, 3.6vw, 1.5rem);
+    color: var(--ink);
+    opacity: 0.75;
+    text-align: center;
+    margin: 0 0 6px;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .eyebrow-heading.hide {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  .counter {
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    opacity: 0.45;
+    margin-bottom: 18px;
+    height: 1em;
+    transition: opacity 0.6s ease;
+  }
+
+  .flower-wrap {
+    position: relative;
+    width: clamp(260px, 62vw, 400px);
+    aspect-ratio: 1 / 1.35;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+
+  svg#flower {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .petal {
+    cursor: pointer;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 1.15s cubic-bezier(.32,.01,.2,1), opacity 1.1s ease;
+    filter: drop-shadow(0 3px 5px rgba(200, 90, 120, 0.18));
+  }
+
+  .petal path {
+    fill: url(#petalGradient);
+    stroke: rgba(255,255,255,0.5);
+    stroke-width: 0.5;
+  }
+
+  .petal:hover:not(.plucked) {
+    filter: drop-shadow(0 6px 10px rgba(200, 90, 120, 0.3));
+  }
+
+  .petal:hover:not(.plucked) path {
+    fill: url(#petalGradientHover);
+  }
+
+  .petal.plucked {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .center-glow {
+    filter: drop-shadow(0 0 10px rgba(255, 197, 90, 0.55));
+  }
+
+  .stem-leaf {
+    transition: opacity 0.6s ease;
+  }
+
+  /* --- message card --- */
+  .message-layer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  .msg-card {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: clamp(1.25rem, 4.8vw, 1.9rem);
+    color: var(--rose);
+    background: rgba(255, 250, 252, 0.9);
+    padding: 14px 20px;
+    border-radius: 999px;
+    box-shadow: 0 12px 28px rgba(200, 60, 100, 0.18), 0 2px 8px rgba(200,60,100,0.08);
+    border: 1px solid rgba(255,255,255,0.8);
+    opacity: 0;
+    transform: translateY(14px) scale(0.9);
+    text-align: center;
+    white-space: normal;
+    line-height: 1.2;
+    backdrop-filter: blur(6px);
+    position: relative;
+    top: -12px;
+    max-width: min(78vw, 300px);
+    overflow: hidden;
+  }
+
+  .msg-card.show {
+    animation: msgPop 1.9s cubic-bezier(.2,.9,.25,1) forwards;
+  }
+
+  @keyframes msgPop {
+    0%   { opacity: 0; transform: translateY(18px) scale(0.8); }
+    18%  { opacity: 1; transform: translateY(0) scale(1.05); }
+    28%  { transform: translateY(0) scale(1); }
+    78%  { opacity: 1; transform: translateY(-4px) scale(1); }
+    100% { opacity: 0; transform: translateY(-26px) scale(0.96); }
+  }
+
+  /* --- floating particles (per-click hearts/sparkles) --- */
+  .particle {
+    position: fixed;
+    z-index: 25;
+    pointer-events: none;
+    font-size: 1.1rem;
+    will-change: transform, opacity;
+    animation: particleFloat 1.6s ease-out forwards;
+  }
+
+  @keyframes particleFloat {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.4) rotate(0deg); }
+    12%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.05) rotate(var(--rot)); }
+  }
+
+  /* --- final celebration --- */
+  .finale {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.1s ease;
+    background: radial-gradient(ellipse at 50% 40%, rgba(255,228,236,0.92), rgba(255,208,221,0.97));
+  }
+
+  .finale.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .finale-content {
+    text-align: center;
+    padding: 20px;
+    max-width: 90vw;
+  }
+
+  .finale-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--rose);
+    font-size: clamp(1.6rem, 6.5vw, 2.7rem);
+    margin: 0 0 10px;
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  .finale.active .finale-title {
+    animation: titleIn 1s cubic-bezier(.2,1.4,.4,1) 0.15s forwards;
+  }
+
+  .finale-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: clamp(1.15rem, 4.2vw, 1.6rem);
+    margin: 0 0 26px;
+    opacity: 0;
+  }
+
+  .finale.active .finale-sub {
+    animation: fadeUp 1s ease 0.55s forwards;
+  }
+
+  @keyframes titleIn {
+    0% { opacity: 0; transform: scale(0.6) rotate(-4deg); }
+    60% { opacity: 1; transform: scale(1.08) rotate(1deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .replay-btn {
+    opacity: 0;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--petal-mid), var(--petal-deep));
+    border: none;
+    padding: 12px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(230, 90, 120, 0.35);
+    letter-spacing: 0.02em;
+  }
+
+  .finale.active .replay-btn {
+    animation: fadeUp 1s ease 0.9s forwards;
+  }
+
+  .replay-btn:active {
+    transform: scale(0.97);
+  }
+
+  .sky-particle {
+    position: fixed;
+    top: -5vh;
+    z-index: 41;
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes fall {
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    8%   { opacity: 1; }
+    100% { transform: translate(var(--drift), 108vh) rotate(var(--spin)); opacity: 0.9; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .petal, .msg-card, .finale-title, .finale-sub, .replay-btn, .particle, .sky-particle {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .msg-card { padding: 14px 22px; white-space: normal; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage">
+    <p class="eyebrow-heading" id="eyebrow">pluck a petal, see what it says</p>
+    <div class="counter" id="counter"></div>
+    <div class="flower-wrap" id="flowerWrap">
+      <svg id="flower" viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="petalGradient" cx="35%" cy="20%" r="90%">
+            <stop offset="0%" stop-color="var(--petal-light)" />
+            <stop offset="60%" stop-color="var(--petal-mid)" />
+            <stop offset="100%" stop-color="var(--petal-deep)" />
+          </radialGradient>
+          <radialGradient id="petalGradientHover" cx="35%" cy="20%" r="90%">
+            <stop offset="0%" stop-color="#ffd7e2" />
+            <stop offset="60%" stop-color="#ffb0c6" />
+            <stop offset="100%" stop-color="#f2839e" />
+          </radialGradient>
+          <radialGradient id="centerGradient" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="var(--center-1)" />
+            <stop offset="100%" stop-color="var(--center-2)" />
+          </radialGradient>
+          <linearGradient id="stemGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="var(--stem-dark)" />
+            <stop offset="100%" stop-color="var(--stem)" />
+          </linearGradient>
+        </defs>
+
+        <!-- stem -->
+        <path class="stem-leaf" d="M200,260 C196,320 210,370 198,430" fill="none" stroke="url(#stemGradient)" stroke-width="7" stroke-linecap="round"/>
+        <!-- leaves -->
+        <path class="stem-leaf" d="M200,330 C160,320 130,340 118,375 C160,378 190,362 200,330 Z" fill="var(--stem)"/>
+        <path class="stem-leaf" d="M202,360 C244,352 276,372 286,405 C246,410 214,392 202,360 Z" fill="var(--stem-dark)"/>
+
+        <g id="petalsGroup"></g>
+
+        <circle class="center-glow" cx="200" cy="200" r="34" fill="url(#centerGradient)"/>
+        <g fill="#e8892f" opacity="0.55">
+          <circle cx="188" cy="192" r="2.2"/>
+          <circle cx="210" cy="188" r="1.8"/>
+          <circle cx="196" cy="210" r="2"/>
+          <circle cx="214" cy="206" r="1.6"/>
+          <circle cx="202" cy="196" r="1.6"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="message-layer">
+    <div class="msg-card" id="msgCard"></div>
+  </div>
+
+  <div class="finale" id="finale">
+    <div class="finale-content">
+      <p class="finale-title">Congratulations Douaa 🥹❤️</p>
+      <p class="finale-sub">Ibrahim loves you so much 💕</p>
+      <button class="replay-btn" id="replayBtn">pluck another flower</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const messages = [
+    "He loves you",
+    "Hehe, he loves you too 😄",
+    "You are his favorite person 💗",
+    "He thinks about you always ❤️",
+    "He adores you endlessly ✨",
+    "His heart is yours 💖",
+    "You make him smile daily 😊",
+    "He loves you more than words 💘"
+  ];
+
+  const PETAL_COUNT = messages.length;
+  const CX = 200, CY = 200;
+  const petalsGroup = document.getElementById('petalsGroup');
+  const eyebrow = document.getElementById('eyebrow');
+  const counter = document.getElementById('counter');
+  const msgCard = document.getElementById('msgCard');
+  const finale = document.getElementById('finale');
+  const flowerWrap = document.getElementById('flowerWrap');
+  const replayBtn = document.getElementById('replayBtn');
+
+  let plucked = 0;
+  let busy = false;
+  let audioCtx = null;
+
+  const petalPathD = "M200,200 C168,166 160,104 200,58 C240,104 232,166 200,200 Z";
+
+  function ensureAudio(){
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return null;
+    if (!audioCtx) audioCtx = new AudioCtor();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playTone(freq, duration = 0.18, type = 'sine', gainValue = 0.035, endFreq = null){
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + duration);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(gainValue, ctx.currentTime + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  }
+
+  function playPetalSound(){
+    playTone(660, 0.14, 'triangle', 0.04, 440);
+    setTimeout(() => playTone(880, 0.12, 'sine', 0.03, 620), 85);
+  }
+
+  function playFinalSound(){
+    playTone(523.25, 0.17, 'triangle', 0.05, 660);
+    setTimeout(() => playTone(659.25, 0.2, 'triangle', 0.05, 790), 110);
+    setTimeout(() => playTone(783.99, 0.28, 'sine', 0.05, 980), 220);
+  }
+
+  function speakText(text){
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.95;
+    utterance.pitch = 1.2;
+    utterance.volume = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function buildFlower(){
+    petalsGroup.innerHTML = '';
+    plucked = 0;
+    busy = false;
+    finale.classList.remove('active');
+    eyebrow.classList.remove('hide');
+    counter.textContent = '';
+
+    for (let i = 0; i < PETAL_COUNT; i++){
+      const angle = (360 / PETAL_COUNT) * i;
+      const wrap = document.createElementNS('http://www.w3.org/2000/svg','g');
+      wrap.setAttribute('transform', `rotate(${angle} ${CX} ${CY})`);
+
+      const petal = document.createElementNS('http://www.w3.org/2000/svg','g');
+      petal.classList.add('petal');
+      petal.dataset.index = i;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', petalPathD);
+      petal.appendChild(path);
+      wrap.appendChild(petal);
+      petalsGroup.appendChild(wrap);
+
+      petal.addEventListener('click', () => pluckPetal(petal));
+    }
+  }
+
+  function pluckPetal(petal){
+    if (busy || petal.classList.contains('plucked')) return;
+    busy = true;
+
+    if (plucked === 0){
+      eyebrow.classList.add('hide');
+    }
+
+    const idx = plucked;
+    plucked++;
+    counter.textContent = `${plucked} / ${PETAL_COUNT}`;
+
+    // random fly-away direction
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    const dx = dir * (60 + Math.random() * 90);
+    const dy = -(90 + Math.random() * 120) * (Math.random() > 0.25 ? 1 : -0.35);
+    const rot = dir * (140 + Math.random() * 160);
+
+    petal.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(0.55)`;
+    petal.classList.add('plucked');
+
+    spawnParticles(petal);
+    showMessage(messages[idx]);
+
+    const isLast = plucked >= PETAL_COUNT;
+
+    setTimeout(() => {
+      busy = false;
+      if (isLast){
+        setTimeout(runFinale, 900);
+      }
+    }, isLast ? 1300 : 550);
+  }
+
+  function showMessage(text){
+    msgCard.classList.remove('show');
+    void msgCard.offsetWidth;
+    msgCard.textContent = text;
+    msgCard.classList.add('show');
+    playPetalSound();
+  }
+
+  function spawnParticles(petalEl){
+    const rect = petalEl.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    const glyphs = ['🌸','💗','✨','💫'];
+    const count = 5 + Math.floor(Math.random() * 3);
+
+    for (let i = 0; i < count; i++){
+      const el = document.createElement('div');
+      el.className = 'particle';
+      el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+      const dx = (Math.random() - 0.5) * 180;
+      const dy = -(60 + Math.random() * 140);
+      const rot = (Math.random() - 0.5) * 200;
+      el.style.setProperty('--dx', dx + 'px');
+      el.style.setProperty('--dy', dy + 'px');
+      el.style.setProperty('--rot', rot + 'deg');
+      el.style.left = (originX - 8 + (Math.random() - 0.5) * 20) + 'px';
+      el.style.top = (originY - 8) + 'px';
+      el.style.animationDelay = (Math.random() * 0.15) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+  }
+
+  let skyInterval = null;
+
+  function runFinale(){
+    finale.classList.add('active');
+    flowerWrap.style.opacity = '0.15';
+    flowerWrap.style.transition = 'opacity 1s ease';
+    playFinalSound();
+
+    spawnSky(28);
+    skyInterval = setInterval(() => spawnSky(3), 500);
+  }
+
+  function spawnSky(count){
+    const glyphs = ['❤️','💗','🌸','✨','💕'];
+    for (let i = 0; i < count; i++){
+      const el = document.createElement('div');
+      el.className = 'sky-particle';
+      el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+      const size = 0.9 + Math.random() * 1.1;
+      el.style.fontSize = size + 'rem';
+      el.style.left = (Math.random() * 100) + 'vw';
+      const duration = 4.5 + Math.random() * 3.5;
+      el.style.animationDuration = duration + 's';
+      el.style.setProperty('--drift', ((Math.random() - 0.5) * 160) + 'px');
+      el.style.setProperty('--spin', ((Math.random() - 0.5) * 360) + 'deg');
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), duration * 1000 + 200);
+    }
+  }
+
+  replayBtn.addEventListener('click', () => {
+    if (skyInterval) clearInterval(skyInterval);
+    document.querySelectorAll('.sky-particle').forEach(el => el.remove());
+    flowerWrap.style.opacity = '1';
+    msgCard.classList.remove('show');
+    msgCard.textContent = '';
+    buildFlower();
+  });
+
+  buildFlower();
+})();
+</script>
+</body>
+</html>
